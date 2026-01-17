@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, MessageSquare, Search, MoreHorizontal, Trash2, Edit2 } from "lucide-react";
+import { Plus, MessageSquare, Search, MoreHorizontal, Trash2, Edit2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -51,76 +51,88 @@ const ChatSidebar = ({
   }, {} as Record<string, Conversation[]>);
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-sidebar">
-      <div className="flex items-center justify-between p-4 border-b">
+    <div className="flex h-full w-[260px] flex-col border-r border-sidebar-border bg-sidebar">
+      {/* Header with Logo */}
+      <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border">
         <FaradayLogo size="sm" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent"
+        >
+          <ChevronDown className="h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="p-3">
+      {/* New Chat Button */}
+      <div className="p-2">
         <Button
           onClick={onNewConversation}
-          className="w-full justify-start gap-2 bg-brand hover:bg-brand/90 text-brand-foreground"
+          variant="ghost"
+          className="w-full justify-start gap-2 h-9 text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent border border-sidebar-border"
         >
           <Plus className="h-4 w-4" />
           New chat
         </Button>
       </div>
 
-      <div className="px-3 pb-2">
+      {/* Search */}
+      <div className="px-2 pb-2">
         <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search conversations..."
-            className="pl-8 h-9 bg-sidebar-accent"
+            placeholder="Search..."
+            className="pl-8 h-8 text-sm bg-sidebar-accent border-sidebar-border placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-2">
+      {/* Conversations List */}
+      <ScrollArea className="flex-1 px-2 scrollbar-thin">
         {Object.entries(groupedConversations).map(([group, convs]) => (
-          <div key={group} className="mb-4">
-            <h3 className="mb-1 px-2 text-xs font-medium text-muted-foreground">
+          <div key={group} className="mb-3">
+            <h3 className="mb-1 px-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               {group}
             </h3>
             {convs.map((conv) => (
               <div
                 key={conv.id}
                 className={cn(
-                  "group flex items-center gap-2 rounded-lg px-2 py-2 cursor-pointer transition-colors",
+                  "group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer transition-colors",
                   activeConversationId === conv.id
-                    ? "bg-sidebar-accent"
-                    : "hover:bg-sidebar-accent/50"
+                    ? "bg-sidebar-accent text-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
                 )}
                 onClick={() => onSelectConversation(conv.id)}
               >
-                <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <MessageSquare className="h-4 w-4 shrink-0 opacity-60" />
                 <span className="flex-1 truncate text-sm">{conv.title}</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-sidebar-accent"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <MoreHorizontal className="h-4 w-4" />
+                      <MoreHorizontal className="h-3.5 w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem>
-                      <Edit2 className="mr-2 h-4 w-4" />
+                      <Edit2 className="mr-2 h-3.5 w-3.5" />
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-destructive"
+                      className="text-destructive focus:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();
                         onDeleteConversation(conv.id);
                       }}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
+                      <Trash2 className="mr-2 h-3.5 w-3.5" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
