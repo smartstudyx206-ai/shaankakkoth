@@ -7,24 +7,30 @@ interface FaradayLogoProps {
 
 const FaradayLogo = ({ size = "md", showText = true }: FaradayLogoProps) => {
   const sizeClasses = {
-    sm: "h-6 w-6",
-    md: "h-8 w-8",
-    lg: "h-10 w-10",
+    sm: "h-5 w-5",
+    md: "h-6 w-6",
+    lg: "h-8 w-8",
+  };
+
+  const containerClasses = {
+    sm: "p-1",
+    md: "p-1.5",
+    lg: "p-2",
   };
 
   const textSizeClasses = {
-    sm: "text-lg",
-    md: "text-xl",
-    lg: "text-2xl",
+    sm: "text-base",
+    md: "text-lg",
+    lg: "text-xl",
   };
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative flex items-center justify-center rounded-lg bg-brand p-1.5">
+      <div className={`relative flex items-center justify-center rounded-lg bg-gradient-to-br from-brand to-purple-400 ${containerClasses[size]}`}>
         <Zap className={`${sizeClasses[size]} text-brand-foreground`} fill="currentColor" />
       </div>
       {showText && (
-        <span className={`font-semibold tracking-tight ${textSizeClasses[size]}`}>
+        <span className={`font-semibold tracking-tight text-foreground ${textSizeClasses[size]}`}>
           Faraday
         </span>
       )}

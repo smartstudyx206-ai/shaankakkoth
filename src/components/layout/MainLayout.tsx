@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Menu, Settings, HelpCircle, User } from "lucide-react";
+import { PanelLeftClose, PanelLeft, Settings, HelpCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -114,23 +114,32 @@ Your backend can then process this and return a response!`,
   return (
     <div className="flex h-screen w-full flex-col bg-background">
       {/* Top Header */}
-      <header className="flex h-12 items-center justify-between border-b px-4">
+      <header className="flex h-11 items-center justify-between border-b border-border px-3 bg-background">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                {sidebarOpen ? (
+                  <PanelLeftClose className="h-4 w-4" />
+                ) : (
+                  <PanelLeft className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{sidebarOpen ? "Close sidebar" : "Open sidebar"}</TooltipContent>
+          </Tooltip>
           {!sidebarOpen && <FaradayLogo size="sm" />}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
                 <HelpCircle className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -139,7 +148,7 @@ Your backend can then process this and return a response!`,
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
                 <Settings className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -148,11 +157,11 @@ Your backend can then process this and return a response!`,
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
                 <User className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>API Keys</DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -175,7 +184,7 @@ Your backend can then process this and return a response!`,
         )}
 
         <ResizablePanelGroup direction="horizontal" className="flex-1">
-          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
+          <ResizablePanel defaultSize={40} minSize={25} maxSize={55}>
             <ChatPanel
               messages={messages}
               isLoading={isLoading}
@@ -183,9 +192,9 @@ Your backend can then process this and return a response!`,
             />
           </ResizablePanel>
 
-          <ResizableHandle withHandle />
+          <ResizableHandle className="w-px bg-border hover:bg-brand/50 transition-colors data-[resize-handle-active]:bg-brand" />
 
-          <ResizablePanel defaultSize={60} minSize={40}>
+          <ResizablePanel defaultSize={60} minSize={45}>
             <CanvasPanel />
           </ResizablePanel>
         </ResizablePanelGroup>
