@@ -1,0 +1,197 @@
+import { useState } from "react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Menu, Settings, HelpCircle, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ChatSidebar from "@/components/chat/ChatSidebar";
+import ChatPanel from "@/components/chat/ChatPanel";
+import CanvasPanel from "@/components/canvas/CanvasPanel";
+import FaradayLogo from "@/components/chat/FaradayLogo";
+import { Message, Conversation } from "@/types/chat";
+
+const MainLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [conversations, setConversations] = useState<Conversation[]>([
+    {
+      id: "1",
+      title: "Getting started with Faraday",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>("1");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const activeConversation = conversations.find((c) => c.id === activeConversationId);
+  const messages = activeConversation?.messages || [];
+
+  const handleSendMessage = async (content: string) => {
+    if (!activeConversationId) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content,
+      timestamp: new Date(),
+    };
+
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id === activeConversationId
+          ? {
+              ...conv,
+              messages: [...conv.messages, userMessage],
+              updatedAt: new Date(),
+              title: conv.messages.length === 0 ? content.slice(0, 40) : conv.title,
+            }
+          : conv
+      )
+    );
+
+    setIsLoading(true);
+
+    // Simulate API call - Replace this with your Python backend call
+    setTimeout(() => {
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `This is a demo response from Faraday. To connect your Python backend:
+
+1. Set up a REST API endpoint (e.g., using FastAPI or Flask)
+2. Replace this setTimeout with a fetch/axios call to your backend
+3. Pass the user message and conversation history
+4. Return the AI response
+
+Example endpoint: POST /api/chat
+Request body: { message: "${content}", conversation_id: "${activeConversationId}" }
+
+Your backend can then process this and return a response!`,
+        timestamp: new Date(),
+      };
+
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === activeConversationId
+            ? {
+                ...conv,
+                messages: [...conv.messages, aiMessage],
+                updatedAt: new Date(),
+              }
+            : conv
+        )
+      );
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleNewConversation = () => {
+    const newConv: Conversation = {
+      id: Date.now().toString(),
+      title: "New conversation",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setConversations((prev) => [newConv, ...prev]);
+    setActiveConversationId(newConv.id);
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    if (activeConversationId === id) {
+      setActiveConversationId(conversations[0]?.id || null);
+    }
+  };
+
+  return (
+    <div className="flex h-screen w-full flex-col bg-background">
+      {/* Top Header */}
+      <header className="flex h-12 items-center justify-between border-b px-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+          {!sidebarOpen && <FaradayLogo size="sm" />}
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Help</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Settings</TooltipContent>
+          </Tooltip>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>API Keys</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Sign out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {sidebarOpen && (
+          <ChatSidebar
+            conversations={conversations}
+            activeConversationId={activeConversationId}
+            onSelectConversation={setActiveConversationId}
+            onNewConversation={handleNewConversation}
+            onDeleteConversation={handleDeleteConversation}
+          />
+        )}
+
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
+            <ChatPanel
+              messages={messages}
+              isLoading={isLoading}
+              onSendMessage={handleSendMessage}
+            />
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          <ResizablePanel defaultSize={60} minSize={40}>
+            <CanvasPanel />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </div>
+  );
+};
+
+export default MainLayout;
