@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Monitor, Tablet, Smartphone, ExternalLink, RotateCcw, Code, Eye, Play } from "lucide-react";
+import { Monitor, Tablet, Smartphone, ExternalLink, RotateCcw, Code, Eye, Database, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type ViewMode = "preview" | "code";
+type ViewMode = "preview" | "code" | "cloud";
 type DeviceMode = "desktop" | "tablet" | "mobile";
 
 const CanvasPanel = () => {
@@ -20,126 +19,228 @@ const CanvasPanel = () => {
 
   return (
     <div className="flex h-full flex-col bg-canvas-bg">
-      {/* Canvas Header */}
-      <div className="flex items-center justify-between border-b border-border px-3 py-2 bg-background">
-        <div className="flex items-center gap-2">
-          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-            <TabsList className="h-8 bg-secondary p-0.5">
-              <TabsTrigger value="preview" className="h-7 gap-1.5 px-3 text-xs data-[state=active]:bg-accent">
-                <Eye className="h-3.5 w-3.5" />
-                Preview
-              </TabsTrigger>
-              <TabsTrigger value="code" className="h-7 gap-1.5 px-3 text-xs data-[state=active]:bg-accent">
-                <Code className="h-3.5 w-3.5" />
-                Code
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+      {/* Top Tabs Bar - Like Lovable's Preview/Code/Cloud tabs */}
+      <div className="flex items-center justify-between border-b border-border px-1 bg-background">
+        <div className="flex items-center">
+          <button
+            onClick={() => setViewMode("preview")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
+              viewMode === "preview"
+                ? "border-brand text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </button>
+          <button
+            onClick={() => setViewMode("code")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
+              viewMode === "code"
+                ? "border-brand text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Code className="h-4 w-4" />
+            Code
+          </button>
+          <button
+            onClick={() => setViewMode("cloud")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px",
+              viewMode === "cloud"
+                ? "border-brand text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Database className="h-4 w-4" />
+            Cloud
+          </button>
         </div>
 
-        <div className="flex items-center gap-1">
-          <div className="flex items-center rounded-md border border-border p-0.5 bg-secondary">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn("h-6 w-6", deviceMode === "desktop" && "bg-accent")}
-                  onClick={() => setDeviceMode("desktop")}
-                >
-                  <Monitor className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Desktop</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn("h-6 w-6", deviceMode === "tablet" && "bg-accent")}
-                  onClick={() => setDeviceMode("tablet")}
-                >
-                  <Tablet className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Tablet</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn("h-6 w-6", deviceMode === "mobile" && "bg-accent")}
-                  onClick={() => setDeviceMode("mobile")}
-                >
-                  <Smartphone className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Mobile</TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-border mx-1" />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <RotateCcw className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Open in new tab</TooltipContent>
-          </Tooltip>
-
-          <Button size="sm" className="h-7 gap-1.5 ml-2 bg-success hover:bg-success/90 text-white">
-            <Play className="h-3 w-3" fill="currentColor" />
+        <div className="flex items-center gap-1 pr-2">
+          <Button size="sm" className="h-7 gap-1.5 bg-success hover:bg-success/90 text-white font-medium">
             Publish
+            <ChevronDown className="h-3 w-3" />
           </Button>
         </div>
       </div>
 
-      {/* Canvas Content */}
-      <div className="flex-1 overflow-auto p-4 bg-canvas-bg">
-        <div
-          className="mx-auto h-full rounded-lg border border-border bg-background shadow-2xl shadow-black/20 transition-all duration-300 overflow-hidden"
-          style={{ maxWidth: deviceWidths[deviceMode] }}
-        >
-          {viewMode === "preview" ? (
-            <div className="flex h-full items-center justify-center p-8">
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-secondary">
-                  <Eye className="h-7 w-7 text-muted-foreground" />
-                </div>
-                <h3 className="text-base font-medium mb-2 text-foreground">Preview Area</h3>
-                <p className="text-sm text-muted-foreground max-w-xs">
-                  Connect your Python backend to render live previews of your generated content.
-                </p>
-              </div>
+      {/* Secondary Toolbar - Device switcher & actions (only for Preview mode) */}
+      {viewMode === "preview" && (
+        <div className="flex items-center justify-between border-b border-border px-3 py-1.5 bg-background/50">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center rounded-md border border-border p-0.5 bg-secondary">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn("h-6 w-6", deviceMode === "desktop" && "bg-accent")}
+                    onClick={() => setDeviceMode("desktop")}
+                  >
+                    <Monitor className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Desktop</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn("h-6 w-6", deviceMode === "tablet" && "bg-accent")}
+                    onClick={() => setDeviceMode("tablet")}
+                  >
+                    <Tablet className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Tablet</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn("h-6 w-6", deviceMode === "mobile" && "bg-accent")}
+                    onClick={() => setDeviceMode("mobile")}
+                  >
+                    <Smartphone className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Mobile</TooltipContent>
+              </Tooltip>
             </div>
-          ) : (
-            <div className="h-full p-4 font-mono text-sm bg-[#0d1117]">
-              <div className="text-[#8b949e]">
-                <span className="text-[#ff7b72]">def</span>{" "}
-                <span className="text-[#d2a8ff]">hello_world</span>():
-                <br />
-                {"    "}<span className="text-[#79c0ff]">print</span>(
-                <span className="text-[#a5d6ff]">"Hello from Faraday!"</span>)
-                <br />
-                {"    "}<span className="text-[#ff7b72]">return</span>{" "}
-                <span className="text-[#a5d6ff]">"Ready to build"</span>
-              </div>
-            </div>
-          )}
+          </div>
+
+          <div className="flex items-center gap-0.5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open in new tab</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
+      )}
+
+      {/* Canvas Content */}
+      <div className="flex-1 overflow-auto bg-canvas-bg">
+        {viewMode === "preview" && (
+          <div className="h-full p-4">
+            <div
+              className="mx-auto h-full rounded-lg border border-border bg-background shadow-2xl shadow-black/20 transition-all duration-300 overflow-hidden"
+              style={{ maxWidth: deviceWidths[deviceMode] }}
+            >
+              <div className="flex h-full items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand/20 to-purple-500/20 border border-brand/20">
+                    <Eye className="h-8 w-8 text-brand" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">Preview Area</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    Connect your Python backend to render live previews of your generated content here.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {viewMode === "code" && (
+          <div className="h-full flex flex-col">
+            {/* Code Editor Header */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-[#0d1117]">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="px-2 py-1 bg-[#161b22] rounded text-foreground">src</span>
+                <span>/</span>
+                <span className="px-2 py-1 bg-[#161b22] rounded text-foreground">main.py</span>
+              </div>
+            </div>
+            {/* Code Content */}
+            <div className="flex-1 p-4 font-mono text-sm bg-[#0d1117] overflow-auto">
+              <div className="flex">
+                <div className="pr-4 text-right text-[#484f58] select-none">
+                  <div>1</div>
+                  <div>2</div>
+                  <div>3</div>
+                  <div>4</div>
+                  <div>5</div>
+                  <div>6</div>
+                  <div>7</div>
+                  <div>8</div>
+                  <div>9</div>
+                  <div>10</div>
+                  <div>11</div>
+                  <div>12</div>
+                </div>
+                <div className="text-[#c9d1d9]">
+                  <div><span className="text-[#ff7b72]">from</span> fastapi <span className="text-[#ff7b72]">import</span> FastAPI</div>
+                  <div><span className="text-[#ff7b72]">from</span> pydantic <span className="text-[#ff7b72]">import</span> BaseModel</div>
+                  <div></div>
+                  <div>app = FastAPI()</div>
+                  <div></div>
+                  <div><span className="text-[#ff7b72]">class</span> <span className="text-[#ffa657]">ChatMessage</span>(BaseModel):</div>
+                  <div>    message: <span className="text-[#79c0ff]">str</span></div>
+                  <div>    conversation_id: <span className="text-[#79c0ff]">str</span></div>
+                  <div></div>
+                  <div><span className="text-[#d2a8ff]">@app.post</span>(<span className="text-[#a5d6ff]">"/api/chat"</span>)</div>
+                  <div><span className="text-[#ff7b72]">async def</span> <span className="text-[#d2a8ff]">chat</span>(msg: ChatMessage):</div>
+                  <div>    <span className="text-[#ff7b72]">return</span> {`{`}<span className="text-[#a5d6ff]">"response"</span>: <span className="text-[#a5d6ff]">"Hello from Faraday!"</span>{`}`}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {viewMode === "cloud" && (
+          <div className="h-full flex flex-col">
+            {/* Cloud Sidebar Tabs */}
+            <div className="flex border-b border-border bg-background">
+              <button className="px-4 py-2.5 text-sm font-medium text-foreground border-b-2 border-brand -mb-px">
+                Database
+              </button>
+              <button className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-px">
+                Auth
+              </button>
+              <button className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-px">
+                Storage
+              </button>
+              <button className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent -mb-px">
+                Functions
+              </button>
+            </div>
+            {/* Cloud Content */}
+            <div className="flex-1 flex items-center justify-center p-8 bg-canvas-bg">
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20">
+                  <Database className="h-8 w-8 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Cloud Connected</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mb-4">
+                  Database, authentication, storage, and functions are ready to use.
+                </p>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Database className="h-4 w-4" />
+                  View Tables
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
