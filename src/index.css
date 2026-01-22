@@ -59,6 +59,13 @@
     /* Success/warning */
     --success: 142 76% 46%;
     --warning: 38 92% 50%;
+
+    /* Code editor */
+    --code-bg: 220 13% 6%;
+    --code-panel: 220 13% 8%;
+    --code-foreground: 210 40% 96%;
+    --code-muted: 220 9% 56%;
+    --code-border: 220 13% 14%;
   }
 }
 
