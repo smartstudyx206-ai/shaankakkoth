@@ -73,6 +73,14 @@ export default {
         },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
+
+        code: {
+          bg: "hsl(var(--code-bg))",
+          panel: "hsl(var(--code-panel))",
+          foreground: "hsl(var(--code-foreground))",
+          muted: "hsl(var(--code-muted))",
+          border: "hsl(var(--code-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

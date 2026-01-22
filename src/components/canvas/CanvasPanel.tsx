@@ -1,13 +1,29 @@
-import { useState } from "react";
-import { Monitor, Tablet, Smartphone, ExternalLink, RotateCcw, Code, Eye, Database, ChevronDown, Play } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Monitor, Tablet, Smartphone, ExternalLink, RotateCcw, Code, Eye, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import type { ProjectFile } from "@/hooks/useLocalProjectFiles";
+import FileTree from "@/components/canvas/code/FileTree";
+import MonacoCodeEditor from "@/components/canvas/code/MonacoCodeEditor";
+import PublishMenu from "@/components/canvas/publish/PublishMenu";
 
 type ViewMode = "preview" | "code" | "cloud";
 type DeviceMode = "desktop" | "tablet" | "mobile";
 
-const CanvasPanel = () => {
+const CanvasPanel = ({
+  files,
+  activePath,
+  activeFile,
+  onSelectFile,
+  onChangeActiveContent,
+}: {
+  files: ProjectFile[];
+  activePath: string;
+  activeFile: ProjectFile;
+  onSelectFile: (path: string) => void;
+  onChangeActiveContent: (next: string) => void;
+}) => {
   const [viewMode, setViewMode] = useState<ViewMode>("preview");
   const [deviceMode, setDeviceMode] = useState<DeviceMode>("desktop");
 
@@ -16,6 +32,10 @@ const CanvasPanel = () => {
     tablet: "768px",
     mobile: "375px",
   };
+
+  const isArduinoActive = useMemo(() => {
+    return activeFile.language === "arduino" || activeFile.path.toLowerCase().endsWith(".ino");
+  }, [activeFile.language, activeFile.path]);
 
   return (
     <div className="flex h-full flex-col bg-canvas-bg">
@@ -61,10 +81,7 @@ const CanvasPanel = () => {
         </div>
 
         <div className="flex items-center gap-1 pr-2">
-          <Button size="sm" className="h-7 gap-1.5 bg-success hover:bg-success/90 text-white font-medium">
-            Publish
-            <ChevronDown className="h-3 w-3" />
-          </Button>
+          <PublishMenu isArduino={isArduinoActive} getArduinoCode={() => activeFile.content} />
         </div>
       </div>
 
@@ -161,46 +178,38 @@ const CanvasPanel = () => {
         )}
 
         {viewMode === "code" && (
-          <div className="h-full flex flex-col">
-            {/* Code Editor Header */}
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-[#0d1117]">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span className="px-2 py-1 bg-[#161b22] rounded text-foreground">src</span>
-                <span>/</span>
-                <span className="px-2 py-1 bg-[#161b22] rounded text-foreground">main.py</span>
+          <div className="h-full flex">
+            {/* File tree */}
+            <aside className="w-[260px] shrink-0 border-r border-code-border bg-code-panel">
+              <div className="h-10 flex items-center px-3 border-b border-code-border">
+                <span className="text-xs font-medium text-muted-foreground">Files</span>
               </div>
-            </div>
-            {/* Code Content */}
-            <div className="flex-1 p-4 font-mono text-sm bg-[#0d1117] overflow-auto">
-              <div className="flex">
-                <div className="pr-4 text-right text-[#484f58] select-none">
-                  <div>1</div>
-                  <div>2</div>
-                  <div>3</div>
-                  <div>4</div>
-                  <div>5</div>
-                  <div>6</div>
-                  <div>7</div>
-                  <div>8</div>
-                  <div>9</div>
-                  <div>10</div>
-                  <div>11</div>
-                  <div>12</div>
+              <FileTree files={files} activePath={activePath} onSelect={onSelectFile} />
+            </aside>
+
+            {/* Editor */}
+            <div className="flex-1 min-w-0 flex flex-col bg-code-bg">
+              <div className="h-10 flex items-center justify-between px-3 border-b border-code-border bg-code-panel">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs text-muted-foreground truncate">{activeFile.path}</span>
+                  {isArduinoActive && (
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground border border-border">
+                      Arduino
+                    </span>
+                  )}
                 </div>
-                <div className="text-[#c9d1d9]">
-                  <div><span className="text-[#ff7b72]">from</span> fastapi <span className="text-[#ff7b72]">import</span> FastAPI</div>
-                  <div><span className="text-[#ff7b72]">from</span> pydantic <span className="text-[#ff7b72]">import</span> BaseModel</div>
-                  <div></div>
-                  <div>app = FastAPI()</div>
-                  <div></div>
-                  <div><span className="text-[#ff7b72]">class</span> <span className="text-[#ffa657]">ChatMessage</span>(BaseModel):</div>
-                  <div>    message: <span className="text-[#79c0ff]">str</span></div>
-                  <div>    conversation_id: <span className="text-[#79c0ff]">str</span></div>
-                  <div></div>
-                  <div><span className="text-[#d2a8ff]">@app.post</span>(<span className="text-[#a5d6ff]">"/api/chat"</span>)</div>
-                  <div><span className="text-[#ff7b72]">async def</span> <span className="text-[#d2a8ff]">chat</span>(msg: ChatMessage):</div>
-                  <div>    <span className="text-[#ff7b72]">return</span> {`{`}<span className="text-[#a5d6ff]">"response"</span>: <span className="text-[#a5d6ff]">"Hello from Faraday!"</span>{`}`}</div>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="h-7 px-2 text-muted-foreground hover:text-foreground" disabled>
+                    Run
+                  </Button>
                 </div>
+              </div>
+              <div className="flex-1 min-h-0">
+                <MonacoCodeEditor
+                  value={activeFile.content}
+                  language={activeFile.language}
+                  onChange={onChangeActiveContent}
+                />
               </div>
             </div>
           </div>

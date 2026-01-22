@@ -15,9 +15,12 @@ import ChatPanel from "@/components/chat/ChatPanel";
 import CanvasPanel from "@/components/canvas/CanvasPanel";
 import FaradayLogo from "@/components/chat/FaradayLogo";
 import { Message, Conversation } from "@/types/chat";
+import { supabase } from "@/integrations/supabase/client";
+import { useLocalProjectFiles } from "@/hooks/useLocalProjectFiles";
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const project = useLocalProjectFiles();
   const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: "1",
@@ -58,24 +61,39 @@ const MainLayout = () => {
 
     setIsLoading(true);
 
-    // Simulate API call - Replace this with your Python backend call
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke("chat", {
+        body: {
+          message: content,
+          conversationId: activeConversationId,
+          activeFile: {
+            path: project.activeFile.path,
+            language: project.activeFile.language,
+            content: project.activeFile.content,
+          },
+        },
+      });
+
+      if (error) throw error;
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `This is a demo response from Faraday. To connect your Python backend:
-
-1. Set up a REST API endpoint (e.g., using FastAPI or Flask)
-2. Replace this setTimeout with a fetch/axios call to your backend
-3. Pass the user message and conversation history
-4. Return the AI response
-
-Example endpoint: POST /api/chat
-Request body: { message: "${content}", conversation_id: "${activeConversationId}" }
-
-Your backend can then process this and return a response!`,
+        content: (data?.message as string) ?? "(no response)",
         timestamp: new Date(),
       };
+
+      if (Array.isArray(data?.files)) {
+        for (const f of data.files) {
+          if (typeof f?.path === "string" && typeof f?.content === "string") {
+            project.upsertFile({
+              path: f.path,
+              content: f.content,
+              language: f.language ?? "text",
+            });
+          }
+        }
+      }
 
       setConversations((prev) =>
         prev.map((conv) =>
@@ -88,8 +106,28 @@ Your backend can then process this and return a response!`,
             : conv
         )
       );
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : "Unknown error";
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `Request failed: ${errMsg}`,
+        timestamp: new Date(),
+      };
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === activeConversationId
+            ? {
+                ...conv,
+                messages: [...conv.messages, aiMessage],
+                updatedAt: new Date(),
+              }
+            : conv
+        )
+      );
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleNewConversation = () => {
@@ -195,7 +233,13 @@ Your backend can then process this and return a response!`,
           <ResizableHandle className="w-px bg-border hover:bg-brand/50 transition-colors data-[resize-handle-active]:bg-brand" />
 
           <ResizablePanel defaultSize={60} minSize={45}>
-            <CanvasPanel />
+            <CanvasPanel
+              files={project.files}
+              activePath={project.activePath}
+              activeFile={project.activeFile}
+              onSelectFile={project.setActivePath}
+              onChangeActiveContent={project.updateActiveContent}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
